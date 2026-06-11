@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>手勢辨識 Demo — Team 6</title>
+<title>Gesture Recognition Demo — Team 6</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -243,16 +243,15 @@
 
 <div id="loadOverlay">
   <div class="spinner"></div>
-  <div id="loadMsg">載入中...</div>
+  <div id="loadMsg">Loading...</div>
 </div>
 
 <header>
-  <h1>手勢辨識</h1>
-  <span class="badge">Team 16</span>
+  <h1>Gesture Recognition</h1>
+  <span class="badge">Team 6</span>
 </header>
 
 <main>
-  <!-- left: video -->
   <div class="video-panel">
     <div class="video-wrap">
       <video id="videoEl" autoplay playsinline muted></video>
@@ -265,33 +264,32 @@
     <div class="video-footer">
       <div class="status">
         <div class="dot amber" id="statusDot"></div>
-        <span id="statusText">點擊啟動攝影機</span>
+        <span id="statusText">Click to start camera</span>
       </div>
-      <button id="startBtn">啟動攝影機</button>
+      <button id="startBtn">Start Camera</button>
     </div>
   </div>
 
-  <!-- right: info -->
   <div class="right-panel">
 
     <div class="card">
-      <div class="card-label">辨識結果</div>
+      <div class="card-label">Recognition Result</div>
       <div class="result-big">
         <span id="rEmoji">✋</span>
         <div class="result-text">
-          <div id="rName" class="na">等待中</div>
+          <div id="rName" class="na">Waiting</div>
           <div id="rReason"></div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-label">各類別機率</div>
+      <div class="card-label">Class Probabilities</div>
       <div id="probBars"></div>
     </div>
 
     <div class="card">
-      <div class="card-label">模型數值</div>
+      <div class="card-label">Model Metrics</div>
       <div class="debug-grid">
         <div class="debug-cell">
           <div class="dc-label">entropy</div>
@@ -314,7 +312,7 @@
     </div>
 
     <div class="card">
-      <div class="card-label">手指狀態</div>
+      <div class="card-label">Finger States</div>
       <div class="fingers" id="fingerStates">
         <span class="fp" id="fp-thumb">thumb</span>
         <span class="fp" id="fp-index">index</span>
@@ -327,11 +325,9 @@
   </div>
 </main>
 
-<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-<!-- ONNX Runtime Web -->
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 
 <script>
@@ -450,7 +446,7 @@ function preprocessLandmarks(rawLm, imgW, imgH) {
 let onnxSession = null;
 
 async function loadModel() {
-  setLoadMsg("載入 ONNX 模型...");
+  setLoadMsg("Loading ONNX model...");
   try {
     onnxSession = await ort.InferenceSession.create("model/landmark_only.onnx", {
       executionProviders: ["wasm"],
@@ -549,7 +545,7 @@ async function onResults(results) {
 
   if(!results.multiHandLandmarks?.length){
     updateUI(0,{reason:"no_hand",probs:new Array(6).fill(0),entropy:0,margin:0,top_prob:0,sec_prob:0,top_class:0},null);
-    $("statusText").textContent="偵測中 — 將手放入畫面";
+    $("statusText").textContent="Detecting — Place hand in frame";
     return;
   }
 
@@ -564,7 +560,7 @@ async function onResults(results) {
 
   updateUI(cls, dbg, normLm);
   $("statusDot").className="dot green";
-  $("statusText").textContent="✓ 偵測到手部";
+  $("statusText").textContent="✓ Hand detected";
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
@@ -572,7 +568,7 @@ initProbBars();
 
 $("startBtn").addEventListener("click", async () => {
   $("startBtn").disabled=true;
-  $("statusText").textContent="請求攝影機權限...";
+  $("statusText").textContent="Requesting camera permission...";
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -583,7 +579,7 @@ $("startBtn").addEventListener("click", async () => {
     videoEl.play();
 
     $("loadOverlay").classList.remove("hidden");
-    setLoadMsg("載入 MediaPipe...");
+    setLoadMsg("Loading MediaPipe...");
 
     const hands = new Hands({
       locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
@@ -602,11 +598,11 @@ $("startBtn").addEventListener("click", async () => {
 
     $("startBtn").style.display="none";
     $("statusDot").className="dot amber";
-    $("statusText").textContent="偵測中 — 將手放入畫面";
+    $("statusText").textContent="Detecting — Place hand in frame";
 
   } catch(e) {
     hideOverlay();
-    $("statusText").textContent="錯誤："+e.message;
+    $("statusText").textContent="Error: "+e.message;
     $("startBtn").disabled=false;
   }
 });
